@@ -207,7 +207,7 @@ def detect_orb_features(image: np.ndarray,
     matching very fast via Hamming distance.
     """
     gray = to_grayscale(image)
-    orb = cv2.ORB_create(nFeatures=n_features)
+    orb = cv2.ORB_create(nfeatures=n_features)
     keypoints, descriptors = orb.detectAndCompute(gray, None)
     return keypoints, descriptors
 
