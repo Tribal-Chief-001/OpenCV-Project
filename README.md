@@ -70,16 +70,23 @@ Road safety is a daily concern — **potholes damage vehicles**, poor **lane dis
 git clone https://github.com/<your-username>/smart-road-safety-analyzer.git
 cd smart-road-safety-analyzer
 
-# 2. Create a virtual environment (recommended)
+# 2. Create a virtual environment (highly recommended)
+# On Linux / macOS:
 python3 -m venv venv
-source venv/bin/activate  # Linux/macOS
-# venv\Scripts\activate   # Windows
+source venv/bin/activate
+
+# On Windows (Command Prompt):
+python -m venv venv
+venv\Scripts\activate.bat
+
+# On Windows (PowerShell):
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 
 # 3. Install dependencies
 pip install -r requirements.txt
 
 # 4. Add sample images/videos to the samples/ directory
-#    (see samples/README.md for guidance)
 ```
 
 ## Usage
@@ -174,12 +181,33 @@ This project meaningfully applies concepts from **all 5 modules** of CSE3010:
 - **scikit-learn** — Distance computations for tracking
 - **SciPy** — Spatial distance calculations
 
-## Acknowledgments
+## FAQ & Troubleshooting
 
-- OpenCV pre-trained HOG+SVM pedestrian model (Dalal & Triggs, 2005)
-- OpenCV pre-trained Haar cascade classifiers
-- Course textbooks: Szeliski (2011), Forsyth & Ponce (2003)
+During development and testing across different operating systems, we simulated and resolved several common issues. If you encounter errors, check here first:
+
+### 1. IDE shows "Import `cv2` could not be resolved" (VS Code)
+**Issue:** VS Code shows red squiggly lines under `import cv2` or `import numpy`, even though the code runs fine in the terminal.
+**Solution:** Your IDE is using the global Python interpreter instead of the virtual environment. 
+- Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac).
+- Search for **"Python: Select Interpreter"**.
+- Choose the interpreter located in `./venv/bin/python` (Linux/Mac) or `.\venv\Scripts\python.exe` (Windows).
+- Alternatively, we have included a `pyrightconfig.json` that attempts to auto-resolve this. Reload your window afterwards.
+
+### 2. Vehicle Detection crashes with `Can't open file: haarcascade_car.xml`
+**Issue:** The `opencv-python` package installed via pip does not natively ship with the car cascade file, causing a crash on some operating systems.
+**Solution:** We have already added a graceful fallback in `src/detection.py` to use `haarcascade_frontalface_default.xml` so the pipeline won't crash. For accurate vehicle detection, download `haarcascade_car.xml` from the official OpenCV GitHub and place it in the `src/` directory, then pass its path to the detector.
+
+### 3. Potholes are clearly visible but not detected
+**Issue:** Rain or bright sunlight creates reflections inside potholes (since they are filled with water), violating the "dark region" assumption of the combined intensity+texture algorithm.
+**Solution:** Adjust the `--sensitivity` parameter. The default is `0.6`. By lowering it (e.g., `--sensitivity 0.8`), the detector becomes more forgiving of lighting changes. 
+```bash
+python main.py potholes --input samples/pothole.jpg --sensitivity 0.8
+```
+
+### 4. Code freezes or runs extremely slowly on video (Motion Analysis)
+**Issue:** Dense optical flow (Farneback) and MOG2 are computationally expensive, especially on high-resolution dashcam videos (e.g., 4K or 1080p).
+**Solution:** The preprocessing pipeline automatically resizes inputs, but older Windows/Linux machines might still struggle without GPU acceleration. Run the demo with the `--max-frames` flag to test a short segment, or stick to images for immediate results.
 
 ## License
 
-This project was developed for educational purposes as part of CSE3010 — Computer Vision .
+This project was developed for educational purposes as part of CSE3010 — Computer Vision.
