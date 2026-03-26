@@ -77,13 +77,13 @@ Implemented both sparse (Lucas-Kanade) and dense (Farneback) optical flow:
 
 ## 4. Challenges Faced
 
-1. **Pothole false positives**: Dark shadows and water puddles initially triggered false detections. Solved by combining intensity + texture methods (multi-method fusion).
-
+1. **Pothole false positives and illumination dependency**: Initially, dark shadows triggered false detections. This was solved by combining intensity and texture. However, real-world testing revealed a profound limitation: **water-filled potholes reflecting the bright sky**. Because the algorithm assumes potholes are "dark regions", it completely missed severe potholes that were highly reflective. The Gabor texture filters successfully found the edges, but the darkness threshold discarded them.
+   
 2. **Lane detection on curved roads**: The Hough Transform assumes straight lines. Mitigated with a smaller ROI focused on the near-road region where curves appear more linear.
 
 3. **Speed estimation accuracy**: Without proper camera calibration, pixel-to-world-unit conversion is approximate. Documented this as a known limitation.
 
-4. **Vehicle detection with Haar cascades**: The pre-trained car cascade has variable performance. Using it alongside the HOG pedestrian detector provides complementary coverage.
+4. **Domain mismatch with Haar Cascades**: During testing, the system confidently bounded patches of trees as "vehicles". This occurred because the required `haarcascade_car.xml` was missing from the standard environment, forcing a fallback to `haarcascade_frontalface_default.xml`. The algorithm searched a forest for faces, found textural patterns resembling eyes/noses in the leaves, and hallucinated false positives. This vividly demonstrated the fragility of sliding-window cascade classifiers when applied out-of-domain.
 
 ## 5. What I Learned
 
@@ -91,13 +91,15 @@ Implemented both sparse (Lucas-Kanade) and dense (Farneback) optical flow:
 
 2. **Preprocessing matters enormously**: CLAHE and bilateral filtering dramatically improved results across all modules. Bad preprocessing = bad everything downstream.
 
-3. **Multi-method fusion**: No single technique is sufficient. Combining methods (intensity + texture + shape) significantly improves robustness.
+3. **Multi-method fusion has blind spots**: No single technique is sufficient, but even combined methods (intensity + texture) fail when environmental conditions violate core heuristic assumptions (e.g., a pothole filled with water acts like a mirror, invalidating the "dark region" assumption).
 
-4. **The importance of non-maximum suppression**: Without NMS, sliding-window detectors produce overwhelming overlapping boxes. NMS is a critical post-processing step.
+4. **Domain specificity of classical detectors**: Haar Cascades are highly domain-specific. Feeding a forest image to a face cascade looking for cars results in hallucinated bounding boxes in the trees. You cannot simply swap classifiers without retraining.
 
-5. **Optical flow assumptions**: The brightness constancy assumption breaks down with illumination changes, which is common in outdoor driving scenarios.
+5. **The importance of non-maximum suppression**: Without NMS, sliding-window detectors (like HOG) produce overwhelming overlapping boxes. NMS is a critical post-processing step.
 
-6. **Modular design pays off**: Separating each technique into its own module made debugging much easier and allowed reusing components across pipelines.
+6. **Optical flow assumptions**: The brightness constancy assumption breaks down with illumination changes, which is common in outdoor driving scenarios.
+
+7. **Modular design pays off**: Separating each technique into its own module made debugging much easier and allowed reusing components across pipelines.
 
 ## 6. Results
 
@@ -112,9 +114,9 @@ The system successfully:
 
 ### Limitations
 - Lane detection assumes relatively straight roads (Hough Transform limitation)
+- Pothole detection fails dramatically on wet, highly reflective potholes (breaks the darkness assumption)
+- Haar cascades produce severe false positives when applied out-of-domain (e.g., tree textures mistaken for objects)
 - Speed estimation is uncalibrated (approximate without camera intrinsics)
-- Pothole detection sensitivity needs tuning per road type
-- Haar cascade vehicle detection has moderate accuracy
 
 ## 7. Future Work
 
