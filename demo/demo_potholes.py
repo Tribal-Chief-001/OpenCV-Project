@@ -27,8 +27,8 @@ def main():
     parser = argparse.ArgumentParser(description="Pothole Detection Demo")
     parser.add_argument("--input", "-i", required=True, help="Input road image")
     parser.add_argument("--output", "-o", default="results/", help="Output directory")
-    parser.add_argument("--sensitivity", "-s", type=float, default=0.4,
-                        help="Darkness threshold (lower=more sensitive, default=0.4)")
+    parser.add_argument("--sensitivity", type=float, default=0.6,
+                        help="Detection sensitivity (0.0 to 1.0, lower is stricter)")
     args = parser.parse_args()
 
     os.makedirs(args.output, exist_ok=True)
