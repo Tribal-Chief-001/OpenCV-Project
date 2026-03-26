@@ -182,4 +182,4 @@ This project meaningfully applies concepts from **all 5 modules** of CSE3010:
 
 ## License
 
-This project was developed for educational purposes as part of CSE3010 — Computer Vision at VIT.
+This project was developed for educational purposes as part of CSE3010 — Computer Vision .
