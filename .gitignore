@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Results (generated output — don't commit)
+results/*.png
+results/*.mp4
+results/*.jpg
+!results/.gitkeep
+
+# Sample data (large files — download separately)
+samples/*.mp4
+samples/*.avi
+samples/*.mov
