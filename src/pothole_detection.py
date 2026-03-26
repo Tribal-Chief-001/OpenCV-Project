@@ -215,8 +215,11 @@ class PotholeDetector:
         texture_map = texture_variance_map(denoised, window_size=15)
         _, texture_mask = cv2.threshold(texture_map, 100, 255, cv2.THRESH_BINARY)
 
-        # Step 5: Combine masks (intersection of dark regions + texture anomaly)
-        combined_mask = cv2.bitwise_and(dark_mask, texture_mask)
+        # Step 5: Combine masks (Allow either dark regions OR strong texture anomalies)
+        # Because potholes filled with water reflect light and appear bright, we cannot
+        # strictly require them to be dark. Using OR ensures we catch both dry (dark) 
+        # and wet (textured/reflective) potholes.
+        combined_mask = cv2.bitwise_or(dark_mask, texture_mask)
         combined_mask = morphological_cleanup(combined_mask, kernel_size=5, operation="close")
         combined_mask = morphological_cleanup(combined_mask, kernel_size=3, operation="open")
 

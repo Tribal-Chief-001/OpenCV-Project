@@ -88,11 +88,11 @@ class VehicleDetector:
     """
 
     def __init__(self, cascade_path: Optional[str] = None):
+        import os
         if cascade_path is None:
-            # opencv-python on pip often doesn't bundle the car cascade.
-            # We use the default frontal face cascade as a fallback for demonstration
-            # purposes so the pipeline doesn't crash on standard installs.
-            cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+            # We explicitly downloaded a car cascade to src/haarcascade_car.xml
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            cascade_path = os.path.join(current_dir, "haarcascade_car.xml")
             
         self.cascade = cv2.CascadeClassifier(cascade_path)
 
